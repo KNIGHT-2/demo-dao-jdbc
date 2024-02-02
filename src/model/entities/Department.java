@@ -7,7 +7,7 @@ import java.util.Objects;
 public class Department implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 8763655018983570959L;
+    private static final long serialVersionUID = 1L;
     private Integer id;
     private String name;
 
@@ -49,7 +49,7 @@ public class Department implements Serializable {
 
     @Override
     public String toString() {
-        return "Department{" + "id = " + id + ", name = " + name + "}\n";
+        return "Department{" + "id = " + id + ", name = " + name + "}";
     }
 
 }
