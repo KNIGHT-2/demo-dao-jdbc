@@ -70,6 +70,9 @@ public class Seller implements Serializable {
     public void setDepartment(Department department){
         this.department = department;
     }
+    public Department getDepartment(){
+        return department;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
