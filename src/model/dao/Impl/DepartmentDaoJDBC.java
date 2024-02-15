@@ -7,12 +7,19 @@ import model.entities.Department;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DepartmentDaoJDBC implements DepartmentDao {
     private Connection conn;
-
+    private Department instantiateDepartment(ResultSet rs) throws SQLException {
+        Department dep = new Department();
+        dep.setId(rs.getInt("Id"));
+        dep.setName(rs.getString("Name"));
+        return dep;
+    }
     public DepartmentDaoJDBC(Connection conn){
         this.conn = conn;
     }
@@ -25,6 +32,7 @@ public class DepartmentDaoJDBC implements DepartmentDao {
             st.setString(2, obj.getName());
 
             st.executeUpdate();
+
         }catch (SQLException e){
             throw new DbException(e.getMessage());
         }finally {
@@ -53,16 +61,62 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 
     @Override
     public void deleteById(Integer id) {
+        PreparedStatement st = null;
+        try{
+            st = conn.prepareStatement("DELETE FROM Department WHERE Id = ?");
+            st.setInt(1, id);
 
+            int rowsAffected = st.executeUpdate();
+            if(rowsAffected == 0){
+                throw new DbException("Non-existing id!");
+            }
+        }catch (SQLException e){
+            throw new DbException(e.getMessage());
+        }finally {
+            DB.closeStatement(st);
+        }
     }
 
     @Override
     public Department findById(Integer id) {
+        PreparedStatement st = null;
+        ResultSet rs = null;
+        try{
+            st = conn.prepareStatement("SELECT * FROM department WHERE Id = ?");
+            st.setInt(1, id);
+            rs = st.executeQuery();
+            if(rs.next()){
+                Department dep = instantiateDepartment(rs);
+                return dep;
+            }
+        }catch (SQLException e){
+            throw new DbException(e.getMessage());
+        }finally {
+            DB.closeStatement(st);
+            DB.closeResultSet(rs);
+        }
         return null;
     }
-
     @Override
     public List<Department> findAll() {
-        return null;
+        PreparedStatement st = null;
+        ResultSet rs = null;
+
+        try {
+            st = conn.prepareStatement("SELECT * FROM department");
+            rs = st.executeQuery();
+            List<Department> list = new ArrayList<>();
+
+            while(rs.next()){
+                int id = rs.getInt("Id");
+                String depName = rs.getString("Name");
+                list.add(new Department(id, depName));
+            }
+            return list;
+        }catch (SQLException e){
+            throw new DbException(e.getMessage());
+        }finally {
+            DB.closeStatement(st);
+        }
     }
 }
